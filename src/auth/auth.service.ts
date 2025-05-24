@@ -1,13 +1,19 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dtos';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
+import { env } from 'src/config/envs.config';
+import { IHashingService } from 'src/common/interfaces';
 @Injectable()
 export class AuthService {
 
-    constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly jwtService: JwtService,
+        @Inject('IHashingService')
+        private readonly bcryptServices: IHashingService,
+    ) { }
 
     async signup(authDto: AuthDto): Promise<Tokens> {
 
@@ -21,7 +27,7 @@ export class AuthService {
             },
         });
 
-        const tokens = await this.getTopkens(newUser.id, newUser.email);
+        const tokens = await this.getTokens(newUser.id, newUser.email);
         await this.updateRtHash(newUser.id, tokens.refresh_token);
 
         return tokens;
@@ -29,33 +35,33 @@ export class AuthService {
     }
 
 
-    async signin(authDto:AuthDto): Promise<Tokens> {
+    async signin(authDto: AuthDto): Promise<Tokens> {
 
         const user = await this.prisma.user.findUnique({
             where: {
                 email: authDto.email,
             },
         });
-        if(!user){
+        if (!user) {
             throw new ForbiddenException('Access Denied');
         }
-        const passwordMatches = await bcrypt.compare(authDto.password, user.password);
-        if(!passwordMatches){
+        const passwordMatches = await this.bcryptServices.comparePassword(authDto.password, user.password);
+        if (!passwordMatches) {
             throw new ForbiddenException('Access Denied');
         }
-        const tokens = await this.getTopkens(user.id, user.email);
+        const tokens = await this.getTokens(user.id, user.email);
         await this.updateRtHash(user.id, tokens.refresh_token);
         return tokens;
-   
-   
+
+
     }
 
 
-    async logout(userId:string) {
+    async logout(userId: string) {
         const user = await this.prisma.user.updateMany({
             where: {
                 id: userId,
-                hashedRt:{
+                hashedRt: {
                     not: null,
                 }
             },
@@ -67,30 +73,31 @@ export class AuthService {
         return user;
     }
 
-    async refreshTokens( userId: string, refreshToken: string) {
+    async refreshTokens(userId: string, refreshToken: string) {
         const user = await this.prisma.user.findUnique({
             where: {
                 id: userId,
             },
         });
 
-        if(!user){
+        if (!user) {
             throw new ForbiddenException('Access Denied');
         }
 
-        const rtMatches = await bcrypt.compare(refreshToken, user.hashedRt!);
+        const rtMatches = await this.bcryptServices.comparePassword(refreshToken, user.hashedRt!);
 
-        if(!rtMatches){
+        if (!rtMatches) {
             throw new ForbiddenException('Access Denied');
         }
-        const tokens = await this.getTopkens(user.id, user.email);
+        const tokens = await this.getTokens(user.id, user.email);
         await this.updateRtHash(user.id, tokens.refresh_token);
         return tokens;
 
     }
 
     async updateRtHash(userId: string, refreshToken: string) {
-        const hash = await bcrypt.hash(refreshToken, 10);
+
+        const hash = await this.bcryptServices.hashPassword(refreshToken);
 
         const user = await this.prisma.user.update({
             where: {
@@ -106,26 +113,24 @@ export class AuthService {
 
 
     private async hashPassword(password: string): Promise<string> {
-
-        const salt = await bcrypt.genSalt(10);
-        return await bcrypt.hash(password, salt);
+        return this.bcryptServices.hashPassword(password);
     }
 
-    private async getTopkens(userId: string, email: string) {
+    private async getTokens(userId: string, email: string) {
         const [at, rt] = await Promise.all([
             this.jwtService.signAsync({
                 sub: userId,
                 email,
             }, {
-                expiresIn: '15m',
-                secret: 'at-secret',
+                expiresIn: env.jwtExpiresIn,
+                secret: env.jwtSecret,
             }),
             this.jwtService.signAsync({
                 sub: userId,
                 email,
             }, {
-                expiresIn: '7d',
-                secret: 'rt-secret',
+                expiresIn: env.jwtRefreshExpiresIn,
+                secret: env.jwtRefreshSecret,
             }),
         ]);
 

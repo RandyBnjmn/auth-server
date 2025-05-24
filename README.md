@@ -1,98 +1,165 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Auth-server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este repositorio contiene un Servidor de Autenticación desarrollado con NestJS, como parte de una demostración práctica requerida en un entorno estudiantil universitario. El sistema fue diseñado para simular la gestión segura de usuarios, utilizando JWT para autenticación sin estado, bcrypt para el cifrado de contraseñas, y conexión a una base de datos PostgreSQL mediante Prisma ORM.**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 📚 Tabla de Contenidos
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Características](#características)
+- [Arquitectura](#arquitectura)
+- [Casos de Uso](#casos-de-uso)
+- [Referencia de API](#referencia-de-api)
+- [Instalación](#instalación)
+- [Variables de Entorno](#variables-de-entorno)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Licencia](#licencia)
 
-## Project setup
+---
 
-```bash
-$ npm install
+## ✅ Características
+
+- **Registro e inicio de sesión de usuarios**
+- **Autenticación con JWT**
+- **Cifrado seguro de contraseñas con bcrypt**
+- **Manejo de sesiones con refresh tokens**
+- **Validación de datos mediante DTOs**
+- **Integración con PostgreSQL usando Prisma**
+- **Código modular y escalable basado en NestJS**
+
+---
+
+## 🧱 Arquitectura
+
+- **NestJS** como framework principal.
+- **PostgreSQL** como base de datos relacional.
+- **Prisma** para la gestión de datos (ORM).
+- **JWT** para autenticación.
+- **bcrypt** para proteger contraseñas.
+- **Docker Compose** opcional para base de datos en local.
+
+---
+
+## 🧩 Casos de Uso
+
+### 1. Registro de Usuario
+- **Ruta:** `POST /auth/register`
+- **Descripción:** Registra un nuevo usuario. Cifra la contraseña y guarda el usuario en la base de datos.
+
+### 2. Login de Usuario
+- **Ruta:** `POST /auth/login`
+- **Descripción:** Autentica las credenciales del usuario y genera JWT y refresh token.
+
+### 3. Renovación de Token
+- **Ruta:** `POST /auth/refresh`
+- **Descripción:** Permite obtener un nuevo token JWT usando el refresh token.
+
+### 4. Logout
+- **Ruta:** `POST /auth/logout`
+- **Descripción:** Invalida el refresh token del usuario.
+
+---
+
+## 🔗 Referencia de API
+
+| Endpoint           | Método | Descripción                   | Requiere Auth |
+|--------------------|--------|-------------------------------|---------------|
+| `/auth/register`   | POST   | Registrar nuevo usuario       | No            |
+| `/auth/login`      | POST   | Autenticación de usuario      | No            |
+| `/auth/refresh`    | POST   | Renovar token de acceso       | Sí            |
+| `/auth/logout`     | POST   | Cerrar sesión del usuario     | Sí            |
+
+---
+
+## ⚙️ Instalación
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <repository-url>
+   cd auth-server
+   ```
+
+2. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
+
+3. **Configurar las variables de entorno:**
+   Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+   ```env
+   PORT=3000
+   DATABASE_URL=postgresql://usuario:password@localhost:5432/tu_basededatos
+   JWT_SECRET=secretojwt
+   JWT_EXPIRES_IN=1h
+   REFRESH_TOKEN_SECRET=secretorefresh
+   REFRESH_TOKEN_EXPIRES_IN=7d
+   ```
+
+4. **Ejecutar las migraciones de Prisma:**
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+5. **Iniciar el servidor:**
+   ```bash
+   npm run start:dev
+   ```
+
+---
+
+## 🔐 Variables de Entorno
+
+| Variable                   | Descripción                             |
+|----------------------------|-----------------------------------------|
+| `PORT`                     | Puerto en el que correrá la aplicación  |
+| `DATABASE_URL`             | URL de conexión a PostgreSQL            |
+| `JWT_SECRET`               | Clave para firmar los tokens JWT        |
+| `JWT_EXPIRES_IN`           | Tiempo de expiración del JWT            |
+| `REFRESH_TOKEN_SECRET`     | Clave para firmar el refresh token      |
+| `REFRESH_TOKEN_EXPIRES_IN` | Tiempo de expiración del refresh token  |
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+auth-server/
+├── prisma/                    # Esquema y migraciones Prisma
+│   └── schema.prisma
+├── src/
+│   ├── auth/                  # Módulo de autenticación
+│   │   ├── dtos/              # Data Transfer Objects (validación)
+│   │   ├── strategies/        # Estrategias de Passport
+│   │   ├── auth.controller.ts
+│   │   ├── auth.module.ts
+│   │   └── auth.service.ts
+│   ├── common/                # Decoradores, guards, interfaces
+│   ├── config/                # Configuración del entorno
+│   ├── prisma/                # Módulo Prisma (servicio y módulo)
+│   ├── app.module.ts
+│   └── main.ts
+├── test/                      # Pruebas
+├── .env
+├── docker-compose.yml
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 🛠️ Tecnologías Utilizadas
 
-# watch mode
-$ npm run start:dev
+- **NestJS** – Framework para aplicaciones escalables en Node.js
+- **PostgreSQL** – Base de datos relacional
+- **Prisma ORM** – ORM moderno para PostgreSQL
+- **JWT** – Autenticación basada en tokens
+- **bcrypt** – Cifrado de contraseñas
+- **dotenv** – Gestión de variables de entorno
 
-# production mode
-$ npm run start:prod
-```
+---
 
-## Run tests
+## 📄 Licencia
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Este proyecto está bajo la licencia [MIT](LICENSE).
