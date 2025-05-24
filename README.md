@@ -44,11 +44,11 @@ Este repositorio contiene un Servidor de Autenticación desarrollado con NestJS,
 ## 🧩 Casos de Uso
 
 ### 1. Registro de Usuario
-- **Ruta:** `POST /auth/register`
+- **Ruta:** `POST /auth/signup`
 - **Descripción:** Registra un nuevo usuario. Cifra la contraseña y guarda el usuario en la base de datos.
 
 ### 2. Login de Usuario
-- **Ruta:** `POST /auth/login`
+- **Ruta:** `POST /auth/signin`
 - **Descripción:** Autentica las credenciales del usuario y genera JWT y refresh token.
 
 ### 3. Renovación de Token
@@ -65,8 +65,8 @@ Este repositorio contiene un Servidor de Autenticación desarrollado con NestJS,
 
 | Endpoint           | Método | Descripción                   | Requiere Auth |
 |--------------------|--------|-------------------------------|---------------|
-| `/auth/register`   | POST   | Registrar nuevo usuario       | No            |
-| `/auth/login`      | POST   | Autenticación de usuario      | No            |
+| `/auth/signup`   | POST   | Registrar nuevo usuario       | No            |
+| `/auth/signin`      | POST   | Autenticación de usuario      | No            |
 | `/auth/refresh`    | POST   | Renovar token de acceso       | Sí            |
 | `/auth/logout`     | POST   | Cerrar sesión del usuario     | Sí            |
 
