@@ -5,12 +5,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { AtGuard } from './common/guards';
 import { ActionsModule } from './actions/actions.module';
 import { ResourceModule } from './resource/resource.module';
+import { PermissionModule } from './permission/permission.module';
+import { RoleModule } from './role/role.module';
 
 
 @Module({
   imports: [
     JwtModule.register({global:true}),
-    AuthModule, PrismaModule, ActionsModule, ResourceModule],
+    AuthModule, PrismaModule, ActionsModule, ResourceModule, PermissionModule, RoleModule],
   controllers: [],
   providers: [
     {
