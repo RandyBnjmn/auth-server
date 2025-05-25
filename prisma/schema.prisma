@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -14,17 +13,124 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id String @id @default(uuid()) @db.Uuid
 
-model User{
-  id        String   @id @default(uuid()) @db.Uuid
-
-  email     String  @unique
-  password  String
+  email    String  @unique
+  password String
   hashedRt String?
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  roleId         String
+  role           Role?            @relation(fields: [roleId], references: [id])
+  userPermission UserPermission[]
 
   @@map("users")
+}
+
+/// Tabla que representa un rol del sistema (ej: Admin, Supervisor, Aprobador).
+/// Un rol puede estar asignado a muchos usuarios y tener múltiples permisos.
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  users       User[]
+  permissions RolePermission[] // Permisos que heredan los usuarios que tienen este rol
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  isDeleted   Boolean          @default(false)
+  deletedAt   DateTime?
+
+  @@map("roles")
+}
+
+/// Tabla que representa un módulo o recurso del sistema.
+/// Ejemplos: 'clientes', 'tickets', 'reportes'.
+model Resource {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  permissions Permission[] // Permisos que afectan a este recurso
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  isDeleted   Boolean      @default(false)
+  deletedAt   DateTime?
+
+  @@map("resources")
+}
+
+/// Tabla que representa una acción u operación del sistema.
+/// Ejemplos: 'GET', 'POST', 'DELETE', 'APROBAR', 'EXPORTAR'.
+model Action {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  permissions Permission[] // Permisos que implican esta acción
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  isDeleted   Boolean      @default(false)
+  deletedAt   DateTime?
+
+  @@map("actions")
+}
+
+/// Tabla que une un recurso con una acción específica para definir un permiso concreto.
+/// Ejemplo: 'clientes' + 'GET' = permiso para ver clientes.
+/// Este permiso puede ser asignado a roles o directamente a usuarios.
+model Permission {
+  id         String @id @default(uuid())
+  resourceId String
+  actionId   String
+
+  resource  Resource         @relation(fields: [resourceId], references: [id])
+  action    Action           @relation(fields: [actionId], references: [id])
+  roles     RolePermission[]
+  users     UserPermission[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  isDeleted Boolean          @default(false)
+  deletedAt DateTime?
+
+  @@unique([resourceId, actionId]) // Evita duplicados del mismo permiso (ej: no repetir 'clientes' + 'GET')
+  @@map("permissions")
+}
+
+/// Tabla intermedia que asigna permisos a los roles.
+/// Cada registro indica que un rol específico tiene acceso a una acción sobre un recurso.
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isDeleted  Boolean    @default(false)
+  deletedAt  DateTime?
+
+  @@unique([roleId, permissionId]) // Evita asignar el mismo permiso dos veces al mismo rol
+  @@map("role_permissions")
+}
+
+/// Tabla intermedia que asigna permisos directamente a un usuario.
+/// Útil para excepciones o casos donde el usuario necesite permisos adicionales a los de su rol.
+model UserPermission {
+  id           String @id @default(uuid())
+  userId       String @db.Uuid
+  permissionId String
+
+  user       User       @relation(fields: [userId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  isDeleted  Boolean    @default(false)
+  deletedAt  DateTime?
+
+  @@unique([userId, permissionId]) // Evita asignar el mismo permiso dos veces al mismo usuario
+  @@map("user_permissions")
 }

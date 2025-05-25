@@ -1,6 +1,6 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dtos';
+import { AuthDto, SignupDto } from './dtos';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { env } from 'src/config/envs.config';
@@ -15,7 +15,7 @@ export class AuthService {
         private readonly bcryptServices: IHashingService,
     ) { }
 
-    async signup(authDto: AuthDto): Promise<Tokens> {
+    async signup(authDto: SignupDto): Promise<Tokens> {
 
         const hashedPassword = await this.hashPassword(authDto.password);
 
@@ -23,7 +23,8 @@ export class AuthService {
         const newUser = await this.prisma.user.create({
             data: {
                 email: authDto.email,
-                password: hashedPassword
+                password: hashedPassword,
+                roleId: authDto.roleId,
             },
         });
 
