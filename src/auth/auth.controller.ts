@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dtos';
+import { AuthDto, SignupDto } from './dtos';
 import { Tokens } from './types';
 import { AtGuard, RtGuard } from 'src/common/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from 'src/common/decorators';
@@ -14,7 +14,7 @@ export class AuthController {
 
     @Public()
     @Post('signup')
-    signUp(@Body() authDto :AuthDto): Promise<Tokens>{
+    signUp(@Body() authDto :SignupDto): Promise<Tokens>{
         return this.authService.signup(authDto);
     }
 
