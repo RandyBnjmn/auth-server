@@ -11,6 +11,17 @@ export class ActionsService {
 
     async createAction(createActionDto: CreateActionDto) {
 
+        const nameTaken = await this.prismaService.action.findUnique({
+            where: {
+                name: createActionDto.name
+            }
+        });
+        
+        if (nameTaken) {
+            throw new ConflictException(`Action with name ${createActionDto.name} already exists`);
+        }
+
+
         const newAction = await this.prismaService.action.create({
             data: {
                 ...createActionDto
