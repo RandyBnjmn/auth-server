@@ -77,7 +77,6 @@ export class ActionsService {
         }
 
         const data: Record<string, any> = {};
-        data.id = id;
         if (dto.name !== undefined) data.name = dto.name;
         if (dto.description !== undefined) data.description = dto.description;
 
