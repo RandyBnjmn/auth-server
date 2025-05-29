@@ -61,7 +61,7 @@ export class UserPermissionService {
             }
         });
 
-        console.log('users', users);
+        this.logger.log(`Fetched users with permissionId: ${permissionId}`, JSON.stringify(users));
         return users.map(user => ({
             userId: user.user.id,
             email: user.user.email,
