@@ -25,6 +25,12 @@ export class RoleController {
         return this.roleService.getRoleById(id);
     }
 
+    //getUserswithRole
+    @Get('get-users-with-role/:roleId')
+    async getUsersWithRole(@Param('roleId') roleId: string) {
+        return this.roleService.getUsersWithRole(roleId);
+    }
+
     @Put(':id')
     async updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
         return this.roleService.updateRole(id, updateRoleDto);
