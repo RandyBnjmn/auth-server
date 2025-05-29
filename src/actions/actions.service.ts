@@ -63,10 +63,10 @@ export class ActionsService {
         console.log('existing', existing.name);
         if (dto.name && dto.name !== existing.name) {
 
-            const nameTaken = await this.prismaService.action.findUnique({
+            const nameTaken = await this.prismaService.action.findFirst({
                 where: {
                     name: dto.name,
-                    NOT: { id },
+                    id: { not: id },
                 },
             });
 
